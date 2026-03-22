@@ -483,18 +483,23 @@
   (async () => {
     log("Tizim ishga tushdi", "info");
     try {
-      const h = await (await fetch('/api/health')).json();
+      const resp = await fetch('/api/health');
+      const h = await resp.json();
       hasKey = !!h.hasKey;
       if (hasKey) {
         log("Server API kaliti tayyor", "ok");
+        log("Kalit: " + (h.keyPreview || '***') + " (" + h.keyLength + " belgi)", "info");
         keyIn.placeholder = "Server kaliti bor";
         ktag.textContent = "✓";
         ktag.className = "ktag ktag--ok";
       } else {
-        log("API kalitni kiriting", "warn");
+        log("Server API kaliti YO'Q!", "err");
+        log("Render → Environment Variables → GEMINI_API_KEY qo'shing", "warn");
+        log("Yoki pastdagi maydonga kalitni kiriting", "warn");
+        log("BEPUL kalit: aistudio.google.com/apikey", "info");
       }
-    } catch {
-      log("Server xato", "err");
+    } catch (e) {
+      log("Server bilan bog'lanib bo'lmadi: " + (e.message || ''), "err");
     }
     await checkCameras();
   })();
