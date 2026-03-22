@@ -1,0 +1,25 @@
+{
+  "name": "ai-vision-detector",
+  "version": "3.0.0",
+  "description": "AI Vision Live Detector — Google Gemini Vision bilan jonli obyekt aniqlash (BEPUL)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "express": "^4.21.0"
+  },
+  "keywords": [
+    "ai",
+    "vision",
+    "gemini",
+    "object-detection",
+    "free",
+    "real-time"
+  ],
+  "license": "MIT"
+}
