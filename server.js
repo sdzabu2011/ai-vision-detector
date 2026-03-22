@@ -32,7 +32,7 @@ Each object must have EXACTLY these fields:
 
 Shape: circle for round objects, triangle for triangular, rectangle for everything else.
 Categories: electronics, furniture, person, food, clothing, vehicle, animal, plant, tool, book, container, decoration
-Uzbek examples: laptop=noutbuk, phone=telefon, person=odam, chair=stul, cup=piyola, book=kitob, monitor=monitor, keyboard=klaviatura, mouse=sichqoncha, bottle=shisha, pen=ruchka, bag=sumka, table=stol, lamp=chiroq, door=eshik, window=deraza, wall=devor, clock=soat, glasses=ko'zoynak, headphones=quloqchin
+Uzbek examples: laptop=noutbuk, phone=telefon, person=odam, chair=stul, cup=piyola, book=kitob, monitor=monitor, keyboard=klaviatura, mouse=sichqoncha, bottle=shisha, pen=ruchka, bag=sumka, table=stol, lamp=chiroq, door=eshik, window=deraza, wall=devor, clock=soat
 
 Output ONLY the JSON array.`;
 
@@ -126,5 +126,5 @@ app.post('/api/analyze', async (req, res) => {
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`\n  AI VISION DETECTOR v3.1 | Port: ${PORT} | Key: ${GEMINI_KEY ? 'YES' : 'NO'}\n`);
+  console.log(`\n  AI VISION DETECTOR v3.2 | Port: ${PORT} | Key: ${GEMINI_KEY ? 'YES' : 'NO'}\n`);
 });
