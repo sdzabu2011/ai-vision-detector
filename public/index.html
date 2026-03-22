@@ -1,230 +1,668 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="description" content="AI Vision Live Detector — Google Gemini bilan BEPUL jonli obyekt aniqlash" />
-  <meta name="theme-color" content="#060c1a" />
-  <title>AI Vision Detector — BEPUL</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/css/styles.css" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<title>AI Vision Detector</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+--bg0:#020510;--bgc:rgba(8,14,30,.82);--bgi:rgba(255,255,255,.032);
+--ca:#00ff88;--car:0,255,136;--cb:#00b4ff;--cbr:0,180,255;--cp:#a855f7;--cpr:168,85,247;
+--cd:#ff3860;--cdr:255,56,96;--cw:#ffb020;
+--t1:#eef0f4;--t2:#8892a6;--t3:#4a5568;
+--brd:rgba(255,255,255,.055);--brdg:rgba(var(--car),.15);
+--r:16px;--rs:10px;--rx:6px;
+--ff:'Inter',system-ui,sans-serif;--fm:'JetBrains Mono',monospace;
+--ease:cubic-bezier(.4,0,.2,1);--spring:cubic-bezier(.34,1.56,.64,1);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{font-family:var(--ff);background:var(--bg0);color:var(--t1);min-height:100vh;line-height:1.5;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input{font-family:inherit;border:none;background:none;color:inherit;outline:none}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(var(--car),.18);border-radius:8px}
+.icon{width:18px;height:18px;flex-shrink:0}
+.icon--s{width:14px;height:14px}
+
+.gcard{background:var(--bgc);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--brd);border-radius:var(--r);position:relative;transition:border-color .3s,box-shadow .3s}
+.gcard::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(var(--car),.2),transparent);border-radius:var(--r) var(--r) 0 0;pointer-events:none}
+.gcard:hover{border-color:var(--brdg)}
+
+/* ═══ BG ═══ */
+.bgfx{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.bggrid{position:absolute;inset:-50%;width:200%;height:200%;background-image:linear-gradient(rgba(var(--car),.02) 1px,transparent 1px),linear-gradient(90deg,rgba(var(--car),.02) 1px,transparent 1px);background-size:70px 70px;transform:perspective(600px) rotateX(35deg);transform-origin:center 60%;animation:gm 55s linear infinite}
+@keyframes gm{to{background-position:0 70px}}
+.orb{position:absolute;border-radius:50%;filter:blur(120px);opacity:.07;will-change:transform}
+.orb--g{width:600px;height:600px;background:var(--ca);top:-200px;right:-150px;animation:o1 28s ease-in-out infinite}
+.orb--b{width:450px;height:450px;background:var(--cb);bottom:-150px;left:-100px;animation:o2 32s ease-in-out infinite}
+.orb--p{width:350px;height:350px;background:var(--cp);top:45%;left:40%;animation:o3 24s ease-in-out infinite}
+@keyframes o1{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(-100px,80px) scale(1.15)}66%{transform:translate(60px,-50px) scale(.9)}}
+@keyframes o2{0%,100%{transform:translate(0,0)}50%{transform:translate(80px,-70px) scale(1.1)}}
+@keyframes o3{0%,100%{transform:scale(1)}50%{transform:scale(1.35)}}
+.particle{position:absolute;width:2px;height:2px;background:var(--ca);border-radius:50%;opacity:0;animation:pu linear infinite}
+@keyframes pu{0%{opacity:0;transform:translateY(100vh) scale(0)}8%{opacity:.4}85%{opacity:.4}100%{opacity:0;transform:translateY(-10vh) scale(1.2)}}
+
+/* ═══ 3D ═══ */
+.s3d{position:fixed;inset:0;pointer-events:none;z-index:0;perspective:800px}
+.cube{position:absolute;transform-style:preserve-3d}
+.cube--a{width:70px;height:70px;top:13%;right:7%;animation:cf1 22s linear infinite}
+.cube--b{width:42px;height:42px;bottom:20%;left:5%;animation:cf2 28s linear infinite}
+.cf{position:absolute;width:100%;height:100%;border:1px solid rgba(var(--car),.06);background:rgba(var(--car),.005)}
+.cube--b .cf{border-color:rgba(var(--cbr),.06)}
+.cube--a .cf:nth-child(1){transform:translateZ(35px)}.cube--a .cf:nth-child(2){transform:rotateY(180deg) translateZ(35px)}.cube--a .cf:nth-child(3){transform:rotateY(90deg) translateZ(35px)}.cube--a .cf:nth-child(4){transform:rotateY(-90deg) translateZ(35px)}.cube--a .cf:nth-child(5){transform:rotateX(90deg) translateZ(35px)}.cube--a .cf:nth-child(6){transform:rotateX(-90deg) translateZ(35px)}
+.cube--b .cf:nth-child(1){transform:translateZ(21px)}.cube--b .cf:nth-child(2){transform:rotateY(180deg) translateZ(21px)}.cube--b .cf:nth-child(3){transform:rotateY(90deg) translateZ(21px)}.cube--b .cf:nth-child(4){transform:rotateY(-90deg) translateZ(21px)}.cube--b .cf:nth-child(5){transform:rotateX(90deg) translateZ(21px)}.cube--b .cf:nth-child(6){transform:rotateX(-90deg) translateZ(21px)}
+@keyframes cf1{0%{transform:rotateX(-20deg) rotateY(0)}50%{transform:rotateX(10deg) rotateY(180deg) translateY(-25px)}100%{transform:rotateX(-20deg) rotateY(360deg)}}
+@keyframes cf2{to{transform:rotateX(15deg) rotateY(360deg) rotateZ(90deg)}}
+.ring{position:absolute;border:1px solid rgba(var(--cpr),.06);border-radius:50%}
+.ring--a{width:100px;height:100px;top:55%;right:4%;animation:rs1 30s linear infinite}
+.ring--b{width:65px;height:65px;top:25%;left:8%;border-color:rgba(var(--cbr),.06);animation:rs2 22s linear infinite}
+@keyframes rs1{to{transform:rotateX(70deg) rotateZ(360deg)}}
+@keyframes rs2{to{transform:rotateX(60deg) rotateY(-360deg)}}
+
+/* ═══ LAYOUT ═══ */
+.app{position:relative;z-index:1;max-width:1620px;margin:0 auto;padding:14px;min-height:100vh;display:flex;flex-direction:column;gap:14px}
+.main{display:flex;gap:14px;flex:1;min-height:0}
+.col-v{flex:1;min-width:0;display:flex;flex-direction:column;gap:12px}
+.col-s{width:350px;flex-shrink:0;display:flex;flex-direction:column;gap:12px}
+
+/* ═══ HEADER ═══ */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;gap:16px;flex-wrap:wrap}
+.hdr__l{display:flex;align-items:center;gap:16px}
+.logo{width:44px;height:44px;position:relative;transform-style:preserve-3d;animation:lr 10s linear infinite;flex-shrink:0}
+.logo__f{position:absolute;width:44px;height:44px;border:1.5px solid var(--ca);border-radius:8px;opacity:.45;background:rgba(var(--car),.02)}
+.logo__f:nth-child(1){transform:translateZ(22px)}.logo__f:nth-child(2){transform:rotateY(180deg) translateZ(22px)}.logo__f:nth-child(3){transform:rotateY(90deg) translateZ(22px)}.logo__f:nth-child(4){transform:rotateY(-90deg) translateZ(22px)}.logo__f:nth-child(5){transform:rotateX(90deg) translateZ(22px)}.logo__f:nth-child(6){transform:rotateX(-90deg) translateZ(22px)}
+.logo__core{position:absolute;top:50%;left:50%;width:10px;height:10px;background:var(--ca);border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 18px var(--ca),0 0 40px rgba(var(--car),.3)}
+@keyframes lr{to{transform:rotateX(-18deg) rotateY(360deg)}}
+.hdr-t{font-size:1.2rem;font-weight:800;letter-spacing:2.5px;background:linear-gradient(135deg,var(--ca),var(--cb));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;line-height:1.2}
+.hdr-st{font-size:.7rem;color:var(--t2);letter-spacing:.8px;margin-top:2px}
+.hdr__r{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+
+.keybox{display:flex;align-items:center;gap:8px;background:var(--bgi);border:1px solid var(--brd);border-radius:var(--rs);padding:0 14px;transition:all .3s}
+.keybox:focus-within{border-color:rgba(var(--car),.25);box-shadow:0 0 20px rgba(var(--car),.06)}
+.keybox svg{color:var(--t3)}
+.keybox__in{padding:9px 0;font-size:.78rem;font-family:var(--fm);width:230px}
+.keybox__in::placeholder{color:var(--t3)}
+.keybox__tag{font-size:.63rem;color:var(--t3);white-space:nowrap}
+.keybox__tag--ok{color:var(--ca)}
+
+.inds{display:flex;gap:8px}
+.ind{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:20px;background:rgba(255,255,255,.025);border:1px solid var(--brd);font-size:.73rem;font-weight:600;color:var(--t2);transition:all .3s}
+.ind__d{width:7px;height:7px;border-radius:50%;background:var(--t3);transition:all .35s}
+.ind--on .ind__d{background:var(--ca);box-shadow:0 0 10px var(--ca);animation:dp 2.5s infinite}
+.ind--on{color:var(--ca);border-color:rgba(var(--car),.12)}
+.ind--live .ind__d{background:var(--cd);box-shadow:0 0 10px var(--cd);animation:dp 1s infinite}
+.ind--live{color:var(--cd);border-color:rgba(var(--cdr),.15)}
+@keyframes dp{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* ═══ VIDEO ═══ */
+.vbox{position:relative;flex:1;min-height:380px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#vid{width:100%;height:100%;object-fit:contain;display:block;background:#000;border-radius:var(--r)}
+#cvs{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;border-radius:var(--r)}
+.brk{position:absolute;width:28px;height:28px;z-index:5;opacity:.25;transition:opacity .3s}
+.vbox:hover .brk{opacity:.7}
+.brk--tl{top:14px;left:14px;border-top:2px solid var(--ca);border-left:2px solid var(--ca)}
+.brk--tr{top:14px;right:14px;border-top:2px solid var(--ca);border-right:2px solid var(--ca)}
+.brk--bl{bottom:14px;left:14px;border-bottom:2px solid var(--ca);border-left:2px solid var(--ca)}
+.brk--br{bottom:14px;right:14px;border-bottom:2px solid var(--ca);border-right:2px solid var(--ca)}
+.scanbar{position:absolute;top:0;left:6%;right:6%;height:2px;background:linear-gradient(90deg,transparent,var(--ca),transparent);box-shadow:0 0 16px var(--ca),0 0 45px rgba(var(--car),.25);opacity:0;pointer-events:none;z-index:6;border-radius:2px}
+.scanbar--on{opacity:.4;animation:sd 3.5s linear infinite}
+@keyframes sd{to{top:100%}}
+.det-flash{position:absolute;inset:0;border:2px solid var(--ca);border-radius:var(--r);opacity:0;pointer-events:none;z-index:7;animation:df .5s ease-out forwards}
+@keyframes df{0%{opacity:.6;transform:scale(1)}100%{opacity:0;transform:scale(1.015)}}
+
+.ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;z-index:4;background:rgba(2,5,16,.92);transition:opacity .5s,visibility .5s}
+.ph--off{opacity:0;visibility:hidden;pointer-events:none}
+.ph__vis{position:relative;width:80px;height:80px;display:flex;align-items:center;justify-content:center}
+.ph__icon{width:38px;height:38px;color:var(--ca);filter:drop-shadow(0 0 14px rgba(var(--car),.4));animation:br 3.5s ease-in-out infinite}
+.ph__ring{position:absolute;inset:-12px;border:1px solid rgba(var(--car),.12);border-radius:50%;animation:rg 3.5s ease-in-out infinite}
+.ph__ring--2{inset:-28px;animation-delay:.5s}
+.ph__ring--3{inset:-44px;animation-delay:1s}
+@keyframes br{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.1);opacity:1}}
+@keyframes rg{0%,100%{transform:scale(1);opacity:.2}50%{transform:scale(1.06);opacity:.06}}
+.ph__t1{font-size:.95rem;color:var(--t2);letter-spacing:1px;font-weight:500}
+.ph__t2{font-size:.75rem;color:var(--t3)}
+
+/* ═══ CONTROLS ═══ */
+.cbar{display:flex;align-items:center;gap:10px;padding:12px 18px;flex-wrap:wrap}
+.cbar__sep{width:1px;height:26px;background:var(--brd);margin:0 4px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border:1px solid var(--brd);border-radius:var(--rs);background:rgba(255,255,255,.025);font-size:.82rem;font-weight:600;letter-spacing:.3px;position:relative;overflow:hidden;transition:all .28s var(--ease);user-select:none}
+.btn::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.06),transparent);opacity:0;transition:opacity .28s}
+.btn:hover::after{opacity:1}
+.btn:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 8px 28px rgba(0,0,0,.35)}
+.btn:active{transform:translateY(1px) scale(.98)}
+.btn:disabled{opacity:.3;pointer-events:none}
+.btn--on{background:linear-gradient(135deg,rgba(var(--car),.14),rgba(var(--car),.04));border-color:rgba(var(--car),.2);color:var(--ca)}
+.btn--on:hover{border-color:var(--ca);box-shadow:0 8px 30px rgba(var(--car),.1)}
+.btn--off{background:linear-gradient(135deg,rgba(var(--cdr),.12),rgba(var(--cdr),.03));border-color:rgba(var(--cdr),.18);color:var(--cd)}
+.btn--off:hover{border-color:var(--cd)}
+.btn--live{background:linear-gradient(135deg,rgba(var(--cdr),.12),rgba(var(--cdr),.03));border-color:rgba(var(--cdr),.2);color:var(--cd)}
+.btn--live.active{animation:lg 2s ease-in-out infinite}
+@keyframes lg{0%,100%{box-shadow:0 0 12px rgba(var(--cdr),.1)}50%{box-shadow:0 0 28px rgba(var(--cdr),.22)}}
+.rdot{width:8px;height:8px;border-radius:50%;background:var(--cd);flex-shrink:0}
+.btn--live.active .rdot{animation:dp 1s infinite}
+
+.ipick{display:flex;align-items:center;gap:8px;margin-left:auto;color:var(--t2)}
+.ipick__btns{display:flex;gap:4px}
+.ipk{padding:6px 13px;border-radius:var(--rx);background:rgba(255,255,255,.02);border:1px solid var(--brd);color:var(--t2);font-size:.74rem;font-weight:600;font-family:var(--fm);transition:all .25s var(--ease)}
+.ipk:hover{border-color:rgba(var(--car),.2);color:var(--t1);background:rgba(var(--car),.04)}
+.ipk.active{background:rgba(var(--car),.1);border-color:rgba(var(--car),.3);color:var(--ca)}
+
+/* ═══ PANELS ═══ */
+.pnl{display:flex;flex-direction:column;overflow:hidden}
+.pnl:hover{box-shadow:0 4px 30px rgba(0,0,0,.2)}
+.pnl__h{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid var(--brd);flex-shrink:0;position:relative}
+.pnl__h::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(var(--car),.12),transparent)}
+.pnl__nm{display:flex;align-items:center;gap:8px;font-size:.73rem;font-weight:700;letter-spacing:2px;color:var(--t2)}
+.pnl__nm svg{color:var(--ca)}
+.badge{background:rgba(var(--car),.1);color:var(--ca);font-size:.68rem;font-weight:700;font-family:var(--fm);padding:2px 9px;border-radius:10px;min-width:24px;text-align:center}
+.pnl__b{padding:6px}
+.pnl__b--scroll{overflow-y:auto;flex:1;min-height:0}
+.pnl__b--mono{padding:8px 12px;font-family:var(--fm);font-size:.71rem;line-height:1.9}
+#pnlObj{flex:1;min-height:0}
+#pnlLog{max-height:260px}
+
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:35px 10px;color:var(--t3);font-size:.82rem;gap:10px}
+.empty svg{width:36px;height:36px;opacity:.3;color:var(--t3)}
+
+.oi{display:flex;align-items:center;padding:10px 12px;border-radius:var(--rs);margin-bottom:3px;background:rgba(255,255,255,.012);border:1px solid transparent;transition:all .25s;animation:os .4s var(--spring) both;cursor:default}
+.oi:hover{background:rgba(var(--car),.03);border-color:rgba(var(--car),.07);transform:translateX(5px)}
+@keyframes os{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
+.oi__bar{width:3px;height:34px;border-radius:2px;background:var(--ca);margin-right:12px;flex-shrink:0;box-shadow:0 0 8px rgba(var(--car),.3)}
+.oi__info{flex:1;min-width:0}
+.oi__name{font-size:.84rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.oi__meta{font-size:.68rem;color:var(--t3);margin-top:2px;display:flex;gap:10px}
+.oi__meta span{display:flex;align-items:center;gap:3px}
+.oi__meta svg{width:11px;height:11px}
+.oi__conf{font-size:.82rem;font-weight:700;color:var(--ca);font-family:var(--fm);flex-shrink:0;margin-left:8px}
+
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px}
+.sc{background:rgba(255,255,255,.015);border:1px solid var(--brd);border-radius:var(--rs);padding:16px 14px;text-align:center;position:relative;overflow:hidden;transition:all .3s}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--ca),var(--cb));opacity:.12;transition:opacity .3s}
+.sc:hover{border-color:var(--brdg);transform:translateY(-3px) scale(1.02);box-shadow:0 10px 25px rgba(0,0,0,.25)}
+.sc:hover::before{opacity:.5}
+.sc__bg{position:absolute;bottom:-4px;right:-4px;width:45px;height:45px;color:var(--ca);opacity:.035;transform:rotate(-12deg)}
+.sc__v{font-size:1.5rem;font-weight:800;font-family:var(--fm);color:var(--ca);line-height:1;margin-bottom:6px;text-shadow:0 0 20px rgba(var(--car),.2)}
+.sc__l{font-size:.65rem;color:var(--t3);letter-spacing:.6px;font-weight:600;text-transform:uppercase}
+
+.lr{display:flex;gap:8px;animation:os .25s var(--ease) both}
+.lt{color:var(--t3);flex-shrink:0;font-size:.67rem}
+.lm{word-break:break-word}
+.lm--ok{color:var(--ca)}.lm--err{color:var(--cd)}.lm--info{color:var(--t3)}.lm--warn{color:var(--cw)}
+
+.tilt{transform:perspective(1000px) rotateX(0) rotateY(0);transition:transform .4s var(--ease);will-change:transform}
+
+@media(max-width:1100px){.col-s{width:300px}.keybox__in{width:160px}}
+@media(max-width:850px){
+  .main{flex-direction:column}
+  .col-s{width:100%;flex-direction:row;flex-wrap:wrap}
+  #pnlObj{flex:1 1 100%;max-height:260px}
+  .pnl:not(#pnlObj){flex:1 1 calc(50% - 6px);min-width:220px}
+  #pnlLog{max-height:200px}
+  .vbox{min-height:280px}
+  .hdr{gap:12px}
+  .hdr__r{width:100%;justify-content:space-between}
+  .keybox__in{flex:1;width:auto;min-width:80px}
+  .cbar__sep{display:none}
+  .ipick{margin-left:0;width:100%;justify-content:center;margin-top:4px}
+}
+@media(max-width:520px){
+  .app{padding:8px}
+  .hdr-t{font-size:.95rem;letter-spacing:1.5px}
+  .hdr-st{display:none}
+  .logo{width:36px;height:36px}
+  .logo__f{width:36px;height:36px}
+  .logo__f:nth-child(1){transform:translateZ(18px)}.logo__f:nth-child(2){transform:rotateY(180deg) translateZ(18px)}.logo__f:nth-child(3){transform:rotateY(90deg) translateZ(18px)}.logo__f:nth-child(4){transform:rotateY(-90deg) translateZ(18px)}.logo__f:nth-child(5){transform:rotateX(90deg) translateZ(18px)}.logo__f:nth-child(6){transform:rotateX(-90deg) translateZ(18px)}
+  .pnl:not(#pnlObj){flex:1 1 100%}
+  .btn{padding:8px 14px;font-size:.76rem}
+  .btn span:not(.rdot){display:none}
+  .sc__v{font-size:1.2rem}
+  .cube,.ring{display:none}
+}
+</style>
 </head>
 <body>
 
-  <!-- ═══ SVG SPRITE ═══ -->
-  <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
-    <symbol id="ic-cam" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-      <circle cx="12" cy="13" r="4"/>
-    </symbol>
-    <symbol id="ic-stop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="6" y="6" width="12" height="12" rx="1"/>
-    </symbol>
-    <symbol id="ic-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-      <circle cx="12" cy="12" r="3"/>
-    </symbol>
-    <symbol id="ic-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
-      <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
-      <line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/>
-    </symbol>
-    <symbol id="ic-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="3" y="12" width="4" height="9" rx="1"/><rect x="10" y="7" width="4" height="14" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/>
-    </symbol>
-    <symbol id="ic-term" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="2" y="3" width="20" height="18" rx="2"/>
-      <polyline points="7 8 10.5 11.5 7 15"/><line x1="14" y1="15" x2="17" y2="15"/>
-    </symbol>
-    <symbol id="ic-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-    </symbol>
-    <symbol id="ic-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-    </symbol>
-    <symbol id="ic-box" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-      <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
-    </symbol>
-    <symbol id="ic-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
-    </symbol>
-    <symbol id="ic-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-      <polyline points="9 12 11 14 15 10"/>
-    </symbol>
-    <symbol id="ic-rect" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></symbol>
-    <symbol id="ic-circ" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></symbol>
-    <symbol id="ic-tri" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 22 22 2 22"/></symbol>
-    <symbol id="ic-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h7a2 2 0 0 1 2 2z"/></symbol>
-    <symbol id="ic-gift" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/>
-      <line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
-    </symbol>
-  </svg>
+<div class="bgfx" aria-hidden="true">
+  <div class="bggrid"></div>
+  <div class="orb orb--g"></div>
+  <div class="orb orb--b"></div>
+  <div class="orb orb--p"></div>
+  <div id="particleBox"></div>
+</div>
 
-  <!-- ═══ BACKGROUND ═══ -->
-  <div class="bg-fx" aria-hidden="true">
-    <div class="bg-grid"></div>
-    <div class="bg-orb bg-orb--g"></div>
-    <div class="bg-orb bg-orb--b"></div>
-    <div class="bg-orb bg-orb--p"></div>
-    <div id="particleBox"></div>
-  </div>
+<div class="s3d" aria-hidden="true">
+  <div class="cube cube--a"><div class="cf"></div><div class="cf"></div><div class="cf"></div><div class="cf"></div><div class="cf"></div><div class="cf"></div></div>
+  <div class="cube cube--b"><div class="cf"></div><div class="cf"></div><div class="cf"></div><div class="cf"></div><div class="cf"></div><div class="cf"></div></div>
+  <div class="ring ring--a"></div>
+  <div class="ring ring--b"></div>
+</div>
 
-  <!-- ═══ 3D SHAPES ═══ -->
-  <div class="scene3d" aria-hidden="true">
-    <div class="s3-cube s3-cube--a">
-      <div class="s3-face s3-front"></div><div class="s3-face s3-back"></div>
-      <div class="s3-face s3-right"></div><div class="s3-face s3-left"></div>
-      <div class="s3-face s3-top"></div><div class="s3-face s3-bottom"></div>
+<div class="app">
+
+  <header class="hdr gcard">
+    <div class="hdr__l">
+      <div class="logo"><div class="logo__f"></div><div class="logo__f"></div><div class="logo__f"></div><div class="logo__f"></div><div class="logo__f"></div><div class="logo__f"></div><div class="logo__core"></div></div>
+      <div>
+        <h1 class="hdr-t">AI VISION DETECTOR</h1>
+        <p class="hdr-st">Google Gemini Vision — BEPUL jonli aniqlash</p>
+      </div>
     </div>
-    <div class="s3-cube s3-cube--b">
-      <div class="s3-face s3-front"></div><div class="s3-face s3-back"></div>
-      <div class="s3-face s3-right"></div><div class="s3-face s3-left"></div>
-      <div class="s3-face s3-top"></div><div class="s3-face s3-bottom"></div>
+    <div class="hdr__r">
+      <div class="keybox">
+        <svg class="icon icon--s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+        <input type="password" id="apiKeyInput" class="keybox__in" placeholder="Gemini API kaliti..." autocomplete="off" spellcheck="false"/>
+        <span class="keybox__tag" id="keyTag"></span>
+      </div>
+      <div class="inds">
+        <div class="ind" id="indCam"><span class="ind__d"></span><span class="ind__t">Kamera</span></div>
+        <div class="ind" id="indLive"><span class="ind__d"></span><span class="ind__t">Kutish</span></div>
+      </div>
     </div>
-    <div class="s3-ring s3-ring--a"></div>
-    <div class="s3-ring s3-ring--b"></div>
-    <div class="s3-diamond"></div>
-  </div>
+  </header>
 
-  <!-- ═══ APP ═══ -->
-  <div class="app">
-
-    <!-- HEADER -->
-    <header class="header gcard">
-      <div class="header__l">
-        <div class="logo3d" aria-hidden="true">
-          <div class="logo3d__f logo3d__front"></div>
-          <div class="logo3d__f logo3d__back"></div>
-          <div class="logo3d__f logo3d__right"></div>
-          <div class="logo3d__f logo3d__left"></div>
-          <div class="logo3d__f logo3d__top"></div>
-          <div class="logo3d__f logo3d__bottom"></div>
-          <div class="logo3d__core"></div>
-        </div>
-        <div>
-          <h1 class="hdr-title">AI VISION DETECTOR</h1>
-          <p class="hdr-sub">
-            Google Gemini Vision — BEPUL jonli aniqlash
-            <svg class="icon icon--xs" style="color:var(--c-accent);vertical-align:middle;margin-left:4px"><use href="#ic-gift"/></svg>
-          </p>
+  <main class="main">
+    <section class="col-v">
+      <div class="vbox gcard tilt" id="vbox">
+        <video id="vid" autoplay playsinline muted></video>
+        <canvas id="cvs"></canvas>
+        <div class="scanbar" id="scanbar"></div>
+        <div class="brk brk--tl"></div><div class="brk brk--tr"></div><div class="brk brk--bl"></div><div class="brk brk--br"></div>
+        <div class="ph" id="ph">
+          <div class="ph__vis">
+            <div class="ph__ring"></div><div class="ph__ring ph__ring--2"></div><div class="ph__ring ph__ring--3"></div>
+            <svg class="ph__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          </div>
+          <p class="ph__t1">Kamera tayyor</p>
+          <p class="ph__t2">Quyidagi tugmani bosib kamerani yoqing</p>
         </div>
       </div>
-      <div class="header__r">
-        <div class="keybox">
-          <svg class="icon icon--sm"><use href="#ic-key"/></svg>
-          <input type="password" id="apiKeyInput" class="keybox__input" placeholder="Gemini API kaliti..." autocomplete="off" spellcheck="false" />
-          <span class="keybox__tag" id="keyTag"></span>
-        </div>
-        <div class="inds">
-          <div class="ind" id="indCam">
-            <span class="ind__dot"></span>
-            <span class="ind__txt">Kamera</span>
-          </div>
-          <div class="ind" id="indLive">
-            <span class="ind__dot"></span>
-            <span class="ind__txt">Kutish</span>
+      <div class="cbar gcard">
+        <button class="btn btn--on" id="btnOn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span>Kamerani yoqish</span></button>
+        <button class="btn btn--off" id="btnOff" disabled><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="6" y="6" width="12" height="12" rx="1"/></svg><span>O'chirish</span></button>
+        <span class="cbar__sep"></span>
+        <button class="btn btn--live" id="btnLive" disabled><span class="rdot"></span><span class="btn__lbl">Jonli aniqlash</span></button>
+        <span class="cbar__sep"></span>
+        <div class="ipick">
+          <svg class="icon icon--s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <div class="ipick__btns" id="ipickBtns">
+            <button class="ipk" data-ms="1500">1.5s</button>
+            <button class="ipk active" data-ms="2500">2.5s</button>
+            <button class="ipk" data-ms="4000">4s</button>
+            <button class="ipk" data-ms="6000">6s</button>
           </div>
         </div>
       </div>
-    </header>
+    </section>
 
-    <!-- MAIN -->
-    <main class="main">
-
-      <!-- LEFT -->
-      <section class="col-v">
-        <div class="vidbox gcard tilt" id="vidbox">
-          <video id="vid" autoplay playsinline muted></video>
-          <canvas id="cvs"></canvas>
-          <div class="scanbar" id="scanbar"></div>
-          <div class="brk brk--tl"></div><div class="brk brk--tr"></div>
-          <div class="brk brk--bl"></div><div class="brk brk--br"></div>
-          <div class="ph" id="ph">
-            <div class="ph__vis">
-              <div class="ph__ring"></div>
-              <div class="ph__ring ph__ring--2"></div>
-              <div class="ph__ring ph__ring--3"></div>
-              <svg class="ph__icon"><use href="#ic-cam"/></svg>
-            </div>
-            <p class="ph__t1">Kamera tayyor</p>
-            <p class="ph__t2">Quyidagi tugmani bosib kamerani yoqing</p>
-          </div>
+    <aside class="col-s">
+      <div class="pnl gcard tilt" id="pnlObj">
+        <div class="pnl__h">
+          <div class="pnl__nm"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg><span>ANIQLANGAN OBYEKTLAR</span></div>
+          <span class="badge" id="objBadge">0</span>
         </div>
-
-        <!-- Controls -->
-        <div class="ctrls gcard">
-          <button class="btn btn--on" id="btnOn">
-            <svg class="icon"><use href="#ic-cam"/></svg>
-            <span>Kamerani yoqish</span>
-          </button>
-          <button class="btn btn--off" id="btnOff" disabled>
-            <svg class="icon"><use href="#ic-stop"/></svg>
-            <span>O'chirish</span>
-          </button>
-          <span class="ctrls__sep"></span>
-          <button class="btn btn--live" id="btnLive" disabled>
-            <span class="rdot"></span>
-            <span class="btn__lbl">Jonli aniqlash</span>
-          </button>
-          <span class="ctrls__sep"></span>
-          <div class="ipick">
-            <svg class="icon icon--sm"><use href="#ic-clock"/></svg>
-            <div class="ipick__btns" id="ipickBtns">
-              <button class="ipk" data-ms="1500">1.5s</button>
-              <button class="ipk active" data-ms="2500">2.5s</button>
-              <button class="ipk" data-ms="4000">4s</button>
-              <button class="ipk" data-ms="6000">6s</button>
-            </div>
-          </div>
+        <div class="pnl__b pnl__b--scroll" id="objList">
+          <div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><p>Hali obyektlar aniqlanmadi</p></div>
         </div>
-      </section>
-
-      <!-- RIGHT -->
-      <aside class="col-s">
-
-        <!-- Objects -->
-        <div class="pnl gcard tilt" id="pnlObj">
-          <div class="pnl__h">
-            <div class="pnl__name"><svg class="icon"><use href="#ic-target"/></svg><span>ANIQLANGAN OBYEKTLAR</span></div>
-            <span class="badge" id="objBadge">0</span>
-          </div>
-          <div class="pnl__b pnl__b--scroll" id="objList">
-            <div class="empty" id="objEmpty">
-              <svg class="empty__ic"><use href="#ic-eye"/></svg>
-              <p>Hali obyektlar aniqlanmadi</p>
-            </div>
-          </div>
+      </div>
+      <div class="pnl gcard tilt">
+        <div class="pnl__h">
+          <div class="pnl__nm"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="12" width="4" height="9" rx="1"/><rect x="10" y="7" width="4" height="14" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/></svg><span>STATISTIKA</span></div>
         </div>
-
-        <!-- Stats -->
-        <div class="pnl gcard tilt">
-          <div class="pnl__h">
-            <div class="pnl__name"><svg class="icon"><use href="#ic-chart"/></svg><span>STATISTIKA</span></div>
-          </div>
-          <div class="sgrid">
-            <div class="sc"><svg class="sc__bg"><use href="#ic-zap"/></svg><div class="sc__v" id="sF">0</div><div class="sc__l">Jami kadrlar</div></div>
-            <div class="sc"><svg class="sc__bg"><use href="#ic-box"/></svg><div class="sc__v" id="sO">0</div><div class="sc__l">Obyektlar</div></div>
-            <div class="sc"><svg class="sc__bg"><use href="#ic-clock"/></svg><div class="sc__v" id="sL">&mdash;</div><div class="sc__l">API (ms)</div></div>
-            <div class="sc"><svg class="sc__bg"><use href="#ic-chart"/></svg><div class="sc__v" id="sA">0</div><div class="sc__l">Tahlil/daq</div></div>
-          </div>
+        <div class="sgrid">
+          <div class="sc"><svg class="sc__bg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg><div class="sc__v" id="sF">0</div><div class="sc__l">Jami kadrlar</div></div>
+          <div class="sc"><svg class="sc__bg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg><div class="sc__v" id="sO">0</div><div class="sc__l">Obyektlar</div></div>
+          <div class="sc"><svg class="sc__bg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><div class="sc__v" id="sL">&mdash;</div><div class="sc__l">API (ms)</div></div>
+          <div class="sc"><svg class="sc__bg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="12" width="4" height="9" rx="1"/><rect x="10" y="7" width="4" height="14" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/></svg><div class="sc__v" id="sA">0</div><div class="sc__l">Tahlil/daq</div></div>
         </div>
-
-        <!-- Log -->
-        <div class="pnl gcard tilt" id="pnlLog">
-          <div class="pnl__h">
-            <div class="pnl__name"><svg class="icon"><use href="#ic-term"/></svg><span>TIZIM JURNALI</span></div>
-          </div>
-          <div class="pnl__b pnl__b--scroll pnl__b--mono" id="logBox"></div>
+      </div>
+      <div class="pnl gcard tilt" id="pnlLog">
+        <div class="pnl__h">
+          <div class="pnl__nm"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="18" rx="2"/><polyline points="7 8 10.5 11.5 7 15"/><line x1="14" y1="15" x2="17" y2="15"/></svg><span>TIZIM JURNALI</span></div>
         </div>
-      </aside>
-    </main>
-  </div>
+        <div class="pnl__b pnl__b--scroll pnl__b--mono" id="logBox"></div>
+      </div>
+    </aside>
+  </main>
+</div>
 
-  <script type="module" src="/js/app.js"></script>
+<script>
+(function(){
+'use strict';
+
+// ═══ DOM ═══
+const $ = id => document.getElementById(id);
+const vid    = $('vid');
+const cvs    = $('cvs');
+const ctx    = cvs.getContext('2d');
+const ph     = $('ph');
+const scan   = $('scanbar');
+const vbox   = $('vbox');
+const keyIn  = $('apiKeyInput');
+const keyTag = $('keyTag');
+const btnOn  = $('btnOn');
+const btnOff = $('btnOff');
+const btnLv  = $('btnLive');
+const indCam = $('indCam');
+const indLv  = $('indLive');
+const objL   = $('objList');
+const objB   = $('objBadge');
+const logBox = $('logBox');
+
+// ═══ STATE ═══
+let stream=null, live=false, timer=null, interval=2500, busy=false, hasKey=false;
+let frames=0, lastN=0, lastMs=null, tLog=[];
+
+// ═══ PARTICLES ═══
+(function mkP(){
+  const box=$('particleBox'); if(!box) return;
+  for(let i=0;i<18;i++){
+    const p=document.createElement('div');p.className='particle';
+    p.style.left=Math.random()*100+'%';
+    p.style.animationDuration=(10+Math.random()*18)+'s';
+    p.style.animationDelay=(Math.random()*12)+'s';
+    const s=1+Math.random()*2; p.style.width=s+'px'; p.style.height=s+'px';
+    box.appendChild(p);
+  }
+})();
+
+// ═══ 3D TILT ═══
+if(!('ontouchstart' in window)){
+  document.querySelectorAll('.tilt').forEach(el=>{
+    el.addEventListener('mousemove',e=>{
+      const r=el.getBoundingClientRect();
+      const nx=(e.clientX-r.left)/r.width-.5;
+      const ny=(e.clientY-r.top)/r.height-.5;
+      el.style.transform='perspective(1000px) rotateX('+(-ny*5)+'deg) rotateY('+(nx*5)+'deg) scale3d(1.01,1.01,1.01)';
+    });
+    el.addEventListener('mouseleave',()=>{
+      el.style.transform='perspective(1000px) rotateX(0) rotateY(0) scale3d(1,1,1)';
+    });
+  });
+}
+
+// ═══ INIT ═══
+async function init(){
+  wlog('Tizim ishga tushirildi','info');
+  wlog('Google Gemini Vision — BEPUL','ok');
+  try{
+    const r=await fetch('/api/health');
+    const h=await r.json();
+    hasKey=!!h.serverKeyConfigured;
+    if(hasKey){
+      wlog('Server API kaliti topildi','ok');
+      keyIn.placeholder='Server kaliti mavjud (ixtiyoriy)';
+      keyTag.textContent='✓ Tayyor';
+      keyTag.classList.add('keybox__tag--ok');
+    }else{
+      wlog('API kalitni kiriting','warn');
+      wlog('BEPUL: aistudio.google.com/apikey','warn');
+    }
+    if(h.limits) wlog('Limitlar: '+h.limits.rpm+' RPM | '+h.limits.rpd+' RPD | '+h.limits.cost,'info');
+  }catch(e){
+    wlog('Server bilan bog\'lanib bo\'lmadi','err');
+  }
+}
+init();
+
+// ═══ EVENTS ═══
+btnOn.addEventListener('click', camOn);
+btnOff.addEventListener('click', camOff);
+btnLv.addEventListener('click', toggleLive);
+
+$('ipickBtns').addEventListener('click', function(e){
+  var b = e.target;
+  if(!b.classList.contains('ipk')) return;
+  document.querySelectorAll('.ipk').forEach(function(x){x.classList.remove('active')});
+  b.classList.add('active');
+  interval = parseInt(b.getAttribute('data-ms'),10);
+  if(live){
+    clearInterval(timer);
+    timer = setInterval(analyze, interval);
+    wlog('Interval: '+interval+'ms','info');
+  }
+});
+
+window.addEventListener('resize',function(){
+  if(stream && vid.videoWidth){
+    cvs.width=vid.videoWidth;
+    cvs.height=vid.videoHeight;
+  }
+});
+
+// ═══ CAMERA ═══
+async function camOn(){
+  try{
+    wlog('Kamera ulanmoqda...','info');
+    stream = await navigator.mediaDevices.getUserMedia({
+      video:{width:{ideal:1280},height:{ideal:720},facingMode:'environment'},
+      audio:false
+    });
+    vid.srcObject=stream;
+    vid.addEventListener('loadedmetadata',function h(){
+      vid.removeEventListener('loadedmetadata',h);
+      cvs.width=vid.videoWidth;
+      cvs.height=vid.videoHeight;
+      wlog('Kamera ulandi: '+vid.videoWidth+'x'+vid.videoHeight,'ok');
+    });
+    ph.classList.add('ph--off');
+    indCam.classList.add('ind--on');
+    indCam.querySelector('.ind__t').textContent='Yoniq';
+    btnOn.disabled=true;
+    btnOff.disabled=false;
+    btnLv.disabled=false;
+  }catch(err){
+    wlog('Kamera xatosi: '+err.message,'err');
+  }
+}
+
+function camOff(){
+  try{
+    if(live) toggleLive();
+    if(stream){stream.getTracks().forEach(function(t){t.stop()});stream=null;}
+    vid.srcObject=null;
+    ctx.clearRect(0,0,cvs.width,cvs.height);
+    ph.classList.remove('ph--off');
+    scan.classList.remove('scanbar--on');
+    indCam.classList.remove('ind--on');
+    indCam.querySelector('.ind__t').textContent='Kamera';
+    btnOn.disabled=false;
+    btnOff.disabled=true;
+    btnLv.disabled=true;
+    renderList([]);
+    wlog('Kamera o\'chirildi','info');
+  }catch(err){
+    wlog('Xatolik: '+err.message,'err');
+  }
+}
+
+// ═══ LIVE ═══
+function toggleLive(){
+  if(!live){
+    var k=keyIn.value.trim();
+    if(!hasKey && !k){
+      wlog('API kaliti kiritilmagan!','err');
+      wlog('BEPUL: aistudio.google.com/apikey','warn');
+      keyIn.focus();
+      keyIn.parentElement.style.borderColor='var(--cd)';
+      setTimeout(function(){keyIn.parentElement.style.borderColor=''},2000);
+      return;
+    }
+    live=true;
+    btnLv.classList.add('active');
+    btnLv.querySelector('.btn__lbl').textContent='To\'xtatish';
+    indLv.classList.add('ind--live');
+    indLv.querySelector('.ind__t').textContent='Jonli';
+    scan.classList.add('scanbar--on');
+    wlog('Jonli aniqlash boshlandi ('+interval+'ms)','ok');
+    analyze();
+    timer=setInterval(analyze,interval);
+  }else{
+    live=false;
+    if(timer){clearInterval(timer);timer=null;}
+    btnLv.classList.remove('active');
+    btnLv.querySelector('.btn__lbl').textContent='Jonli aniqlash';
+    indLv.classList.remove('ind--live');
+    indLv.querySelector('.ind__t').textContent='Kutish';
+    scan.classList.remove('scanbar--on');
+    wlog('Jonli aniqlash to\'xtatildi','info');
+  }
+}
+
+// ═══ ANALYZE ═══
+async function analyze(){
+  if(!live || busy || !stream) return;
+  busy=true;
+  try{
+    var b64=snap();
+    if(!b64){busy=false;return;}
+    wlog('Kadr tahlil qilinmoqda...','info');
+    var t0=performance.now();
+    var k=keyIn.value.trim();
+    var headers={'Content-Type':'application/json'};
+    if(k) headers['X-Client-Key']=k;
+
+    var resp=await fetch('/api/analyze',{
+      method:'POST',
+      headers:headers,
+      body:JSON.stringify({image:b64})
+    });
+    var json=await resp.json();
+    if(!resp.ok || !json.success) throw new Error(json.error || 'Xatolik: '+resp.status);
+
+    var objects=json.objects||[];
+    var ms=Math.round(performance.now()-t0);
+    frames++;lastN=objects.length;lastMs=ms;
+    var now=Date.now();tLog.push(now);tLog=tLog.filter(function(t){return now-t<60000});
+
+    flashFx();
+    drawBoxes(objects);
+    renderList(objects);
+    $('sF').textContent=frames;
+    $('sO').textContent=lastN;
+    $('sL').textContent=lastMs;
+    $('sA').textContent=tLog.length;
+
+    wlog(objects.length+' ta obyekt aniqlandi ('+ms+'ms)','ok');
+  }catch(err){
+    wlog('Xatolik: '+err.message,'err');
+    if(err.message.indexOf('429')!==-1 || err.message.indexOf('Rate')!==-1){
+      wlog('Intervalini kattaroq qiling (4s yoki 6s)','warn');
+    }
+  }
+  busy=false;
+}
+
+function snap(quality,maxDim){
+  quality=quality||0.72; maxDim=maxDim||1024;
+  if(!vid.videoWidth) return null;
+  var w=vid.videoWidth, h=vid.videoHeight;
+  if(Math.max(w,h)>maxDim){var r=maxDim/Math.max(w,h);w=Math.round(w*r);h=Math.round(h*r);}
+  var c=document.createElement('canvas');c.width=w;c.height=h;
+  c.getContext('2d').drawImage(vid,0,0,w,h);
+  return c.toDataURL('image/jpeg',quality).split(',')[1];
+}
+
+// ═══ DRAW ═══
+function drawBoxes(objects){
+  var W=cvs.width, H=cvs.height;
+  ctx.clearRect(0,0,W,H);
+  objects.forEach(function(obj){
+    var x=(obj.x||0)*W, y=(obj.y||0)*H, w=(obj.w||0)*W, h=(obj.h||0)*H;
+    var conf=Math.round((obj.confidence||0)*100);
+    var lbl=(obj.labelUz||obj.label||'?')+'  '+conf+'%';
+    var shape=obj.shape||'rectangle';
+
+    ctx.save();
+    ctx.shadowColor='#00ff88';ctx.shadowBlur=14;
+    ctx.strokeStyle='#00ff88';ctx.lineWidth=2;
+    ctx.fillStyle='rgba(0,255,136,0.045)';
+
+    if(shape==='circle'){
+      var rx=w/2, ry=h/2;
+      ctx.beginPath();ctx.ellipse(x+rx,y+ry,Math.abs(rx),Math.abs(ry),0,0,Math.PI*2);
+      ctx.fill();ctx.stroke();
+    }else if(shape==='triangle'){
+      ctx.beginPath();ctx.moveTo(x+w/2,y);ctx.lineTo(x+w,y+h);ctx.lineTo(x,y+h);ctx.closePath();
+      ctx.fill();ctx.stroke();
+    }else{
+      ctx.fillRect(x,y,w,h);ctx.strokeRect(x,y,w,h);
+      var tl=Math.min(14,w*0.2,h*0.2);
+      ctx.lineWidth=3;ctx.shadowBlur=18;
+      ctx.beginPath();ctx.moveTo(x,y+tl);ctx.lineTo(x,y);ctx.lineTo(x+tl,y);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(x+w-tl,y);ctx.lineTo(x+w,y);ctx.lineTo(x+w,y+tl);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(x,y+h-tl);ctx.lineTo(x,y+h);ctx.lineTo(x+tl,y+h);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(x+w-tl,y+h);ctx.lineTo(x+w,y+h);ctx.lineTo(x+w,y+h-tl);ctx.stroke();
+    }
+
+    ctx.shadowBlur=0;
+    var fs=Math.max(11,Math.min(15,W*0.014));
+    ctx.font='bold '+fs+'px Inter,sans-serif';
+    var tw=ctx.measureText(lbl).width;
+    var px=8,py=4,tH=fs+py*2,tW=tw+px*2;
+    var tY=Math.max(0,y-tH-5);
+    ctx.fillStyle='rgba(0,255,136,0.88)';
+    ctx.beginPath();
+    var rr=4;
+    ctx.moveTo(x+rr,tY);ctx.lineTo(x+tW-rr,tY);ctx.arcTo(x+tW,tY,x+tW,tY+rr,rr);
+    ctx.lineTo(x+tW,tY+tH-rr);ctx.arcTo(x+tW,tY+tH,x+tW-rr,tY+tH,rr);
+    ctx.lineTo(x+rr,tY+tH);ctx.arcTo(x,tY+tH,x,tY+tH-rr,rr);
+    ctx.lineTo(x,tY+rr);ctx.arcTo(x,tY,x+rr,tY,rr);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#000';ctx.fillText(lbl,x+px,tY+py+fs-2);
+    ctx.restore();
+  });
+}
+
+function flashFx(){
+  var f=document.createElement('div');f.className='det-flash';
+  vbox.appendChild(f);
+  f.addEventListener('animationend',function(){f.remove()});
+}
+
+// ═══ RENDER LIST ═══
+function renderList(objects){
+  objB.textContent=objects.length;
+  if(!objects.length){
+    objL.innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:36px;height:36px;opacity:.3;color:var(--t3)"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><p>Hali obyektlar aniqlanmadi</p></div>';
+    return;
+  }
+  var html='';
+  objects.forEach(function(o,i){
+    var conf=Math.round((o.confidence||0)*100);
+    var shapeLabel=o.shape||'rectangle';
+    html+='<div class="oi" style="animation-delay:'+(i*40)+'ms">'+
+      '<div class="oi__bar"></div>'+
+      '<div class="oi__info">'+
+        '<div class="oi__name">'+esc(o.labelUz||o.label||'—')+'</div>'+
+        '<div class="oi__meta">'+
+          '<span>'+shapeLabel+'</span>'+
+          '<span>'+esc(o.category||'—')+'</span>'+
+        '</div>'+
+      '</div>'+
+      '<div class="oi__conf">'+conf+'%</div>'+
+    '</div>';
+  });
+  objL.innerHTML=html;
+}
+
+// ═══ LOG ═══
+function wlog(msg,type){
+  var now=new Date();
+  var ts=[now.getHours(),now.getMinutes(),now.getSeconds()].map(function(n){return String(n).padStart(2,'0')}).join(':');
+  var row=document.createElement('div');row.className='lr';
+  row.innerHTML='<span class="lt">'+ts+'</span><span class="lm lm--'+type+'">'+esc(msg)+'</span>';
+  logBox.appendChild(row);
+  logBox.scrollTop=logBox.scrollHeight;
+  while(logBox.children.length>100) logBox.removeChild(logBox.firstChild);
+}
+
+function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+})();
+</script>
 </body>
 </html>

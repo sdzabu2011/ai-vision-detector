@@ -1,57 +1,10 @@
-# ══════════════════════════════════════
-# MAXFIY KALITLAR — hech qachon git'ga!
-# ══════════════════════════════════════
 .env
 .env.*
 !.env.example
-*.pem
-*.key
-*.cert
-*.secret
-secrets/
-
-# ══════════════════════════════════════
-# Node.js
-# ══════════════════════════════════════
 node_modules/
 package-lock.json
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# ══════════════════════════════════════
-# OS
-# ══════════════════════════════════════
+*.log
 .DS_Store
-.DS_Store?
-._*
 Thumbs.db
-ehthumbs.db
-Desktop.ini
-*.swp
-*.swo
-*~
-
-# ══════════════════════════════════════
-# IDE / Editor
-# ══════════════════════════════════════
 .vscode/
 .idea/
-*.sublime-project
-*.sublime-workspace
-*.code-workspace
-
-# ══════════════════════════════════════
-# Build / Temp
-# ══════════════════════════════════════
-dist/
-build/
-.cache/
-tmp/
-temp/
-*.tmp
-*.log
-logs/
-coverage/
-.nyc_output/
